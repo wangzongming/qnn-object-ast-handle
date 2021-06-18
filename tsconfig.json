@@ -1,0 +1,61 @@
+{
+    "workers": 4,
+    "async": false,
+    "useTypescriptIncrementalApi": true,
+    "watch": [
+        "src"
+    ], 
+    "isolatedModules": false,
+    "compilerOptions": {
+        "outDir": "./dist/es",
+        "allowJs": false,
+        "baseUrl": ".",
+        "paths": {
+            "qnn-table": [
+                "/dist/es"
+            ],
+            "qnn-form": [
+                "../../../../node_modules/qnn-form-dev"
+            ]
+        },
+        "allowSyntheticDefaultImports": true,
+        "target": "esnext", // 编译目标
+        "module": "esnext",
+        "noImplicitAny": true, 
+        "preserveConstEnums": true,
+        "skipLibCheck": true,
+        "moduleResolution": "node",
+        "resolveJsonModule": true,
+        "isolatedModules": false,
+        "declaration": true,
+        "removeComments": false,
+        "emitDeclarationOnly": true,
+        "declarationDir": "dist/es",
+        "incremental": true,
+        "watch": true,
+        "jsx": "preserve",
+        "typeRoots": [
+            "node_modules/@types"
+        ],
+        "types": [
+            "node"
+        ],
+        "lib": [
+            "dom",
+            "es2017",
+            "ES2015"
+        ],
+    },
+    "exclude": [
+        "node_modules",
+        "lib",
+        "es",
+        "./dist/**/*", // 不排除将会收到重新文件的报错 
+        "./emitDeclaration.js",  
+        "./src-backup/**",  
+    ], 
+    "toc":[
+        "回调形参",
+        "表格组件实例" 
+    ]
+}
