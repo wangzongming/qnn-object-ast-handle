@@ -1,19 +1,23 @@
-
+// 创建属性值
 import {
-    stringLiteral, booleanLiteral, numericLiteral, objectExpression, arrayExpression,
-    StringLiteral, BooleanLiteral, NumericLiteral, ObjectExpression, ObjectProperty, ArrayExpression
+    stringLiteral, booleanLiteral, numericLiteral, objectExpression, arrayExpression, nullLiteral,
+    StringLiteral, BooleanLiteral, NumericLiteral, ObjectExpression, ObjectProperty, ArrayExpression, NullLiteral
 } from "@babel/types";
 import createPropertie from "./createPropertie"
 
 type Value = string | boolean | number;
 export type ArrayValue = Value[];
 export type ObjectValue = { [field: string]: Value };
-type Res = StringLiteral | BooleanLiteral | NumericLiteral | ObjectExpression | ArrayExpression;
+type Res = StringLiteral | BooleanLiteral | NumericLiteral | ObjectExpression | ArrayExpression | NullLiteral;
 type CreateLiteral = (value: Value | ArrayValue | ObjectValue | ObjectValue[]) => Res;
 
 const createLiteral: CreateLiteral = (value) => {
     let objectNode: Res;
     switch (typeof value) {
+		case "undefined":
+            objectNode = nullLiteral()
+            // objectNode = stringLiteral("")
+            break;
         case "string":
             objectNode = stringLiteral(value)
             break;
@@ -40,7 +44,7 @@ const createLiteral: CreateLiteral = (value) => {
             }
             break;
         default:
-            console.error('暂不支持的处理类型：', typeof value)
+            console.error('[createLiteral.js] 暂不支持的处理类型：', typeof value)
             break;
     }
 
