@@ -1,11 +1,13 @@
 ## qnn-object-ast-handle 字面的对象 AST 节点操作插件
- 
+   
+[![](https://img.shields.io/badge/issues-brightgreen)](https://github.com/wangzongming/qnn-object-ast-handle/issues)
+[![](https://img.shields.io/badge/npm-brightgreen)](https://www.npmjs.com/package/qnn-object-ast-handle)
 
-> 操作 字面量对象 AST 节点如同呼吸一样简单，支持查询和修改对象中的某个属性。而且支持数组、字面量对象属性的操作，满足一切对字面量对象的操作。
+
+> 操作 字面量对象 AST 节点如同呼吸一样简单，支持查询、修改、删除对象中的某个属性或者数组中的某个元素。 
 
 
-
-### 本插件建立在以下插件基础之上（感激之心不言于表）
+### 本插件建立在以下插件基础之上
 
 - gogocode https://github.com/thx/gogocode#readme
 - @babel/types https://babeljs.io/docs/en/babel-types

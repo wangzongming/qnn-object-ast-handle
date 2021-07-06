@@ -21,7 +21,9 @@ const getProtoType: GetProtoType = (node) => {
 			isArray = false;
 			protots = getObjectAttr(node);
 		} else {
-			console.error(`暂不支持的属性解析：${node.type}`);
+			isArray = false;
+			protots = "__disabled__";
+			console.error(`[getObjectAttr.ts] 暂不支持的属性解析：${node.type}`);
 		}
 	};
 	loopFn(node);
@@ -39,14 +41,14 @@ const getObjectAttr: GetObjectAttr = (astNode, name) => {
 	const nameArr: string[] = name ? (name as string).split(".") : [];
 	const nameArrLen: number = nameArr.length - 1;
 	const astNodeType = astNode.type;
-
+	// console.log('astNode', astNode)
 	// 如果是数组
 	if (astNodeType === "ArrayExpression") {
 		const curName = Number(nameArr[0]);
 		const { elements } = astNode as ArrayExpression;
 		if (curName || curName === 0) {
-			const targetAst = elements[curName]; 
-			const nextAttr = nameArr.splice(1, nameArr.length - 1).join('.')
+			const targetAst = elements[curName];
+			const nextAttr = nameArr.splice(1, nameArr.length - 1).join(".");
 			// console.log(targetAst, nextAttr)
 			// 这个类型除了为对象就是数组，所以直接as为对象
 			return getObjectAttr(targetAst as ObjectExpression, nextAttr);
@@ -56,6 +58,9 @@ const getObjectAttr: GetObjectAttr = (astNode, name) => {
 		}
 	}
 
+	// 如果是函数
+	// console.log('astNodeType:', astNodeType)
+
 	// 不传入name的情况下获取整个对象，必须传入字面量对象代码节点 ObjectExpression
 	if (!name && name !== 0) {
 		const obj: any = {};
@@ -63,12 +68,13 @@ const getObjectAttr: GetObjectAttr = (astNode, name) => {
 			(astNode as ObjectExpression).properties.forEach((item: any) => {
 				const key: string = item.key?.name || item.key?.value;
 				const value: any = item.value?.value;
-				const type: any = item.value?.type;
+				const type: any = item.value?.type || item.type;
 				const expression: any = item.expression;
 				switch (type) {
 					case "StringLiteral":
 					case "BooleanLiteral":
 					case "NumericLiteral":
+					case "NullLiteral":
 						obj[key] = value;
 						break;
 					case "ObjectExpression":
@@ -84,11 +90,14 @@ const getObjectAttr: GetObjectAttr = (astNode, name) => {
 						obj[key] = getProtoType(expression);
 						break;
 					case "ArrowFunctionExpression":
-						// 箭头函数, 只读取名字，暂不读取函数体
-						obj[key] = "";
+					case "FunctionExpression":
+					case "ObjectMethod":
+						// 不支持解析的使用 __disabled__ 标注
+						obj[key] = "__disabled__";
 						break;
 					default:
-						console.error("暂不支持读取该类型：", type);
+						obj[key] = "__disabled__";
+						console.error("[getObjectAttr.ts] 暂不支持读取该类型：", type);
 						break;
 				}
 			});
@@ -128,7 +137,7 @@ const getObjectAttr: GetObjectAttr = (astNode, name) => {
 						}
 						return;
 					} else if (curItem.type === "ArrayExpression") {
-						console.error("暂不支持解析二维数组");
+						console.error("[getObjectAttr.ts] 暂不支持解析二维数组");
 					}
 				} else {
 					curASTNode = $(curItem);

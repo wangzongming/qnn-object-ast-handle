@@ -1,7 +1,5 @@
-import { Node, ObjectExpression } from "@babel/types";
-// import createPropertie, { RealValue } from "./method/createPropertie";
+import { Node } from "@babel/types";
 import createLiteral from "./method/createLiteral";
-// const $ = require("gogocode");
 
 /**
  * 删除对象ast节点, 返回设置后的AST节点
@@ -13,8 +11,8 @@ import createLiteral from "./method/createLiteral";
  */
 export type DelObjectAttr = (astNode: Node, name?: string) => any;
 const delObjectAttr: DelObjectAttr = (astNode, name) => {
+	// console.log("delObjectAttr:", astNode, name);
 	if (!name) return createLiteral(undefined);
-
 	const astNodeType = astNode.type;
 	const nameArr: string[] = name.split(".");
 	const nameArrLen: number = nameArr.length - 1;
@@ -30,8 +28,10 @@ const delObjectAttr: DelObjectAttr = (astNode, name) => {
 					if (nameArrLen === index) {
 						switch (type) {
 							case "ObjectExpression":
+								// console.log("需要删除：", realCur, cur);
 								realCur.properties = properties.filter((item: any) => {
-									return item.key.name !== cur;
+									const itemKey = item.key.name || item.key.value;
+									return itemKey !== cur;
 								});
 								return root;
 							case "ArrayExpression":
@@ -48,18 +48,20 @@ const delObjectAttr: DelObjectAttr = (astNode, name) => {
 						switch (type) {
 							case "ObjectExpression":
 								const nextItemByObj = properties.filter((item: any) => {
-									return item.key.name === cur;
+									const itemKey = item.key.name || item.key.value;
+									return itemKey === cur;
 								});
+								// console.log('第一层', realCur, cur, nextItemByObj)
 								return { parent: nextItemByObj[0]?.["value"], root: root };
 							case "ArrayExpression":
-								// 这里的逻辑一定是需要删除数组项中的某项中的某个属性  
+								// 这里的逻辑一定是需要删除数组项中的某项中的某个属性
 								return { parent: elements[+cur], root: root };
 							default:
 								console.error(`[delObjectAttr.ts] 暂不支持删除该类型：${type}`);
 								break;
 						}
 
-						console.log(realCur);
+						// console.log(realCur);
 					}
 				},
 				{ root: astNode }
