@@ -40,8 +40,7 @@ export type GetObjectAttr<T = GetObjectAttrRes> = (astNode: ObjectExpression | A
 const getObjectAttr: GetObjectAttr = (astNode, name) => {
 	const nameArr: string[] = name ? (name as string).split(".") : [];
 	const nameArrLen: number = nameArr.length - 1;
-	const astNodeType = astNode.type;
-	// console.log('astNode', astNode)
+	const astNodeType = astNode.type; 
 	// 如果是数组
 	if (astNodeType === "ArrayExpression") {
 		const curName = Number(nameArr[0]);
@@ -58,9 +57,7 @@ const getObjectAttr: GetObjectAttr = (astNode, name) => {
 		}
 	}
 
-	// 如果是函数
-	// console.log('astNodeType:', astNodeType)
-
+	// 如果是函数  
 	// 不传入name的情况下获取整个对象，必须传入字面量对象代码节点 ObjectExpression
 	if (!name && name !== 0) {
 		const obj: any = {};

@@ -1,29 +1,41 @@
-## qnn-object-ast-handle 字面的对象 AST 节点操作插件
+## qnn-object-ast-handle 代码文件中的js字面量对象操作插件
    
 [![](https://img.shields.io/badge/issues-brightgreen)](https://github.com/wangzongming/qnn-object-ast-handle/issues)
 [![](https://img.shields.io/badge/npm-brightgreen)](https://www.npmjs.com/package/qnn-object-ast-handle)
 
 
-> 操作 字面量对象 AST 节点如同呼吸一样简单，支持查询、修改、删除对象中的某个属性或者数组中的某个元素。 
+<br />
 
+### <a href="https://github.com/wangzongming/qnn-object-ast-handle/blob/master/readme-english.md">Englist</a>  | <a href="https://github.com/wangzongming/qnn-object-ast-handle/blob/master/readme.md">简体中文</a>
+
+<br />
+
+### 简介
+
+如果你正在进行低代码等需要操作解析代码的工作那本插件将非常适合于你。本插件用 javascript 操作 对象数据的方式来进行代码操作。即使你完全不懂 ast 也可直接调用提供的 api 对你的代码文件进行操作。
+
+该组件只负责对代码文件中定义的字面量对象进行操作。也就是说这个组件的功能只专注于操作字面量对象或者数组。
+
+除了上面所说外，另外希望读者能顺手点个 star ~ 非常感谢。
 
 ### 本插件建立在以下插件基础之上
 
-- gogocode https://github.com/thx/gogocode#readme
 - @babel/types https://babeljs.io/docs/en/babel-types
+- gogocode https://github.com/thx/gogocode#readme
 
 
 ### 安装
 
     yarn add qnn-object-ast-handle | yarn i qnn-object-ast-handle
 
-### 使用案例
+### 快速开始
 
     // 从整个文件中查询出字面量对象ast代码推荐直接使用 gogocode 插件
     const $ = require('gogocode');
     const { getObjectAttr, setObjectAttr, delObjectAttr } = require('qnn-object-ast-handle');
-  
-    const matchs: any = $(` 
+    
+    // 假如这是从某个代码文件中读取出来的代码内容
+    const code = ` 
         window.configs = { 
             name:"test",
             obj:{
@@ -35,18 +47,52 @@
             person:[ "王" ],
             personObj:[ { name:"王", age:24 } ]
         } 
-    `).find('window.configs = $_$');
+    `;
+    
+    // ==== 需求1：修改 window.configs.obj.zong.foo 为 "张三" ==== 
 
-    // 字面量对象 ast 节点
+    // 拿到字面量对象 ast 节点
+    const matchs: any = $(code).find('window.configs = $_$');
     const objectAst = matchs.match[0][0].node;
 
     // 传入 ast 节点，修改属性。返回新的 ast 节点
-    const newObjectAst = setObjectAttr(objectAst, 'obj.zong.foo', "张三"); 
-    
+    const newObjectAst = setObjectAttr(objectAst, 'obj.zong.foo', "张三");  
+    // 使用 gogocode 替换 ast 节点并且生成新的代码文件内容
+    const curAttrCodeStr: string = $(newObjectAst).generate(); 
+    const newCode = $(code).replace(`window.configs = $_$`, `${protoStr} = ${curAttrCodeStr}`).generate();
+
+    // 修改后的 code 如下
+    ` 
+        window.configs = { 
+            name:"test",
+            obj:{
+                wang:'hh',
+                zong:{
+                    foo:"张三"
+                }
+            },
+            person:[ "王" ],
+            personObj:[ { name:"王", age:24 } ]
+        } 
+    `;
+
+
+    // ==== 需求2：要从一段代码文件中准确获取某个属性 ==== 
+
     // 获取 ast 节点中的某个属性
     const attrVal = getObjectAttr(objectAst, 'obj.zong.foo');  // 张三
  
- 
+
+
+    // ==== 需求3：要从一段代码文件中准确删除某个属性 ==== 
+  
+    const newObjectAstByDeled = delObjectAttr(objectAst, "name");
+
+    // 使用 gogocode 替换 ast 节点并且生成新的代码文件内容
+    const curAttrCodeStr: string = $(newObjectAstByDeled).generate(); 
+    const newCode = $(code).replace(`window.configs = $_$`, `${protoStr} = ${curAttrCodeStr}`).generate();
+
+
 ### 修改属性
 
     // 修改指定的某一项属性
@@ -105,41 +151,26 @@
     const attrVal2 = getObjectAttr(objectAst, "personObj.0"); // { name:"王", age:24 }
  
 
-### 删除指定的属性
-
-    const matchs: any = gogocode(` 
-        window.configs = { 
-            name:"test",
-            obj:{
-                wang:'hh',
-                zong:{
-                    foo:11
-                }
-            },
-            // 这是 person 注释
-            person:[ "王" ],
-            personObj:[ { name:"王", age:24, table:{ title:"王" }  } ]
-        } 
-    `).find('window.configs = $_$');
-
-    // 字面量对象 ast 节点
-    const objectAst = matchs.match[0][0].node;
+### 删除指定的属性 
 
     // 传入 ast 节点，修改属性。返回新的 ast 节点
     // 全部删除, 返回 null
-    // const newObjectAst = delObjectAttr(objectAst);
+    const newObjectAst = delObjectAttr(objectAst);
+
     // 删除某个属性 
-    // const newObjectAst = delObjectAttr(objectAst, "name");
-    // const newObjectAst = delObjectAttr(objectAst, "obj.wang");
-    // const newObjectAst = delObjectAttr(objectAst, 'obj.zong');
-    // const newObjectAst = delObjectAttr(objectAst, 'obj.zong.foo');
+    const newObjectAst = delObjectAttr(objectAst, "name");
+    const newObjectAst = delObjectAttr(objectAst, "obj.wang");
+    const newObjectAst = delObjectAttr(objectAst, 'obj.zong');
+    const newObjectAst = delObjectAttr(objectAst, 'obj.zong.foo');
+
     // 数组操作
-    // const newObjectAst = delObjectAttr(objectAst, 'person');
-    // const newObjectAst = delObjectAttr(objectAst, 'person.0');
-    // const newObjectAst = delObjectAttr(objectAst, 'personObj.0.name');
+    const newObjectAst = delObjectAttr(objectAst, 'person');
+    const newObjectAst = delObjectAttr(objectAst, 'person.0');
+    const newObjectAst = delObjectAttr(objectAst, 'personObj.0.name');
     const newObjectAst = delObjectAttr(objectAst, 'personObj.0.table.title');
     console.log('delObjectAttr:', gogocode(newObjectAst).generate())
 
 ### 和 gogoCode 这类插件的区别？
 
 区别在于本插件只专注于对字面量对象的操作，用操作 js 字面量对象的手法来操作 ast 节点。
+更加简单，更加灵活！

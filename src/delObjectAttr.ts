@@ -10,8 +10,7 @@ import createLiteral from "./method/createLiteral";
  * 返回新的 ast 节点
  */
 export type DelObjectAttr = (astNode: Node, name?: string) => any;
-const delObjectAttr: DelObjectAttr = (astNode, name) => {
-	// console.log("delObjectAttr:", astNode, name);
+const delObjectAttr: DelObjectAttr = (astNode, name) => { 
 	if (!name) return createLiteral(undefined);
 	const astNodeType = astNode.type;
 	const nameArr: string[] = name.split(".");
@@ -59,9 +58,7 @@ const delObjectAttr: DelObjectAttr = (astNode, name) => {
 							default:
 								console.error(`[delObjectAttr.ts] 暂不支持删除该类型：${type}`);
 								break;
-						}
-
-						// console.log(realCur);
+						} 
 					}
 				},
 				{ root: astNode }
