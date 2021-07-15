@@ -6,7 +6,7 @@
 
 <br />
 
-### <a href="https://github.com/wangzongming/qnn-object-ast-handle/blob/master/readme-english.md">Englist</a>  | <a href="https://github.com/wangzongming/qnn-object-ast-handle/blob/master/readme.md">简体中文</a>
+### <a href="https://github.com/wangzongming/qnn-object-ast-handle/blob/master/readme-english.md">English</a>  | <a href="https://github.com/wangzongming/qnn-object-ast-handle/blob/master/readme.md">简体中文</a>
 
 <br />
 
