@@ -56,7 +56,7 @@ const delObjectAttr: DelObjectAttr = (astNode, name) => {
 								// 这里的逻辑一定是需要删除数组项中的某项中的某个属性
 								return { parent: elements[+cur], root: root };
 							default:
-								console.error(`[delObjectAttr.ts] 暂不支持删除该类型：${type}`);
+								console.error(`[delObjectAttr.ts] 暂不支持删除 ${cur} 属性为类型：${type} 的数据`);
 								break;
 						} 
 					}

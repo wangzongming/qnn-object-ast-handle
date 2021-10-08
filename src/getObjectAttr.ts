@@ -26,7 +26,13 @@ const getProtoType: GetProtoType = (node) => {
 			console.error(`[getObjectAttr.ts] 暂不支持的属性解析：${node.type}`);
 		}
 	};
-	loopFn(node);
+
+	if (!node) {
+		isArray = false;
+		protots = "__disabled__";
+	} else {
+		loopFn(node);
+	}
 	return isArray ? protots.reverse().join(".") : protots;
 };
 
@@ -40,7 +46,7 @@ export type GetObjectAttr<T = GetObjectAttrRes> = (astNode: ObjectExpression | A
 const getObjectAttr: GetObjectAttr = (astNode, name) => {
 	const nameArr: string[] = name ? (name as string).split(".") : [];
 	const nameArrLen: number = nameArr.length - 1;
-	const astNodeType = astNode.type; 
+	const astNodeType = astNode.type;
 	// 如果是数组
 	if (astNodeType === "ArrayExpression") {
 		const curName = Number(nameArr[0]);
@@ -57,7 +63,7 @@ const getObjectAttr: GetObjectAttr = (astNode, name) => {
 		}
 	}
 
-	// 如果是函数  
+	// 如果是函数
 	// 不传入name的情况下获取整个对象，必须传入字面量对象代码节点 ObjectExpression
 	if (!name && name !== 0) {
 		const obj: any = {};
@@ -67,6 +73,7 @@ const getObjectAttr: GetObjectAttr = (astNode, name) => {
 				const value: any = item.value?.value;
 				const type: any = item.value?.type || item.type;
 				const expression: any = item.expression;
+
 				switch (type) {
 					case "StringLiteral":
 					case "BooleanLiteral":
@@ -84,7 +91,7 @@ const getObjectAttr: GetObjectAttr = (astNode, name) => {
 					case "MemberExpression":
 						// 引用的变量属性，需要层层递归 value.property 和 value.object
 						// eg: window.configs.apis.getUseInfo,
-						obj[key] = getProtoType(expression);
+						obj[key] = getProtoType(expression || item?.value);
 						break;
 					case "ArrowFunctionExpression":
 					case "FunctionExpression":
@@ -92,9 +99,21 @@ const getObjectAttr: GetObjectAttr = (astNode, name) => {
 						// 不支持解析的使用 __disabled__ 标注
 						obj[key] = "__disabled__";
 						break;
+					case "Identifier":
+						// 变量引用 name: name // 这里name没有引号，为变量
+						obj[key] = "__disabled__";
+						break;
+					case "NewExpression":
+						// new 表达式 eg: new Date()
+						obj[key] = "__disabled__";
+						break;
+					case "JSXElement":
+						// eg: <div>111</div>
+						obj[key] = "__disabled__";
+						break;
 					default:
 						obj[key] = "__disabled__";
-						console.error("[getObjectAttr.ts] 暂不支持读取该类型：", type);
+						console.error(`[getObjectAttr.ts] 暂不支持读取属性 ${key} 的类型：`, type);
 						break;
 				}
 			});
@@ -147,6 +166,7 @@ const getObjectAttr: GetObjectAttr = (astNode, name) => {
 				arrtVal = undefined;
 				return $pre; // 这时候不会再有子集了，所以直接返回自己避免报错
 			}
+
 			if (index === nameArrLen) {
 				if (typeof curASTNode === "string") {
 					arrtVal = curASTNode;
@@ -172,14 +192,14 @@ const getObjectAttr: GetObjectAttr = (astNode, name) => {
 						arrtVal = {};
 						if (exgNode.properties) {
 							exgNode.properties.forEach((item: any) => {
-								const key: string = item.key?.name;
+								const key: string = item.key?.name || item.key?.value;
 								const value: any = item.value?.value;
 								const type: any = item.value?.type;
 								if (type === "StringLiteral") {
 									(arrtVal as any)[key] = value;
-								} else {
-									// 非字符串，需要解析
-									(arrtVal as any)[key] = getObjectAttr(item.node);
+								} else { 
+									// 非字符串，需要解析 
+									(arrtVal as any)[key] = getObjectAttr(item.node || item.value);
 								}
 							});
 						}
