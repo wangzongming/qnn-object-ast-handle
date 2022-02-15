@@ -1,6 +1,6 @@
 {
     "name": "qnn-object-ast-handle",
-    "version": "1.2.3",
+    "version": "1.2.4",
     "description": "使操作 javascript 字面量对象 AST 节点如同呼吸一样简单，支持查询和修改字面量对象中的某个属性，满足一切对字面量对象的操作。",
     "author": "wangzongming",
     "license": "MIT",
@@ -23,17 +23,16 @@
         "deploy": "gh-pages -d example/build"
     },
     "peerDependencies": {
-        "gogocode":"^1.0.3",
-        "@babel/types":"^7.14.5"
+        "@babel/types": "^7.14.5",
+        "gogocode": "^1.0.3"
     },
     "devDependencies": {
-        "rollup-plugin-terser": "^6.1.0",
-        "@rollup/plugin-node-resolve":"8.1.0",
-        "@rollup/plugin-commonjs":"13.0.0",
-        "@rollup/plugin-url":"5.0.1",
         "@babel/core": "7.2.2",
-        "@rollup/plugin-image": "2.0.5",
         "@babel/plugin-external-helpers": "^7.8.3",
+        "@rollup/plugin-commonjs": "13.0.0",
+        "@rollup/plugin-image": "2.0.5",
+        "@rollup/plugin-node-resolve": "8.1.0",
+        "@rollup/plugin-url": "5.0.1",
         "@svgr/rollup": "2.4.1",
         "babel-core": "7.0.0-bridge.0",
         "babel-eslint": "9.0.0",
@@ -50,11 +49,12 @@
         "eslint-plugin-promise": "4.0.0",
         "eslint-plugin-react": "7.10.0",
         "eslint-plugin-standard": "3.1.0",
-        "gh-pages": "^1.2.0", 
+        "gh-pages": "^1.2.0",
         "react-scripts": "1.1.4",
-        "rollup": "^2.3.2",   
+        "rollup": "^2.3.2",
         "rollup-plugin-peer-deps-external": "2.2.0",
-        "rollup-plugin-postcss": "1.6.2", 
+        "rollup-plugin-postcss": "1.6.2",
+        "rollup-plugin-terser": "^6.1.0",
         "rollup-plugin-uglify": "^6.0.4"
     },
     "files": [
