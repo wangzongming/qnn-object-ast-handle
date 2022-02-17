@@ -6,7 +6,8 @@ import url from "@rollup/plugin-url";
 import postcss from "rollup-plugin-postcss";
 import external from "rollup-plugin-peer-deps-external";
 import { terser } from "rollup-plugin-terser";
-import emitDeclaration from "./emitDeclaration"; 
+// import emitDeclaration from "./emitDeclaration"; 
+import emitDeclaration from "../../lib/emitDeclaration"; 
 
 const fs = require("fs");
 const path = require("path");
@@ -24,6 +25,12 @@ export default {
 		{
 			dir: "dist/es",
 			format: "es",
+			sourcemap: !production,
+			exports: "named",
+		},
+		{
+			dir: "dist/cjs",
+			format: "cjs",
 			sourcemap: !production,
 			exports: "named",
 		},
@@ -113,7 +120,7 @@ export default {
 		}),
 
 		//生成d.ts文件
-		!production && emitDeclaration(),
+		emitDeclaration(),
 		production && terser(),
 	],
 };

@@ -12,23 +12,28 @@ const $ = require("gogocode");
  * @option  其他控制属性，如：像数组的某一个索引插入一条数据
  */
 export type Option = {
-	// 对数组的操作：向数组的某个位置插入一条数据
-	// 如果没有这个配置将会采用替换的方式去操作数组项
+	/**
+	 * 对数组的操作：向数组的某个位置插入一条数据
+	 * 如果没有这个配置将会采用替换的方式去操作数组项
+	 */
+
 	isInset?: boolean;
 };
 export type SetObjectAttr = (astNode: Node, name: string, value: RealValue, option?: Option) => Node;
 const setObjectAttr: SetObjectAttr = (astNode, name, value, option = {}) => {
+	if(!astNode){
+		console.warn(`setObjectAttr 函数必须传入 astNode`);
+		return;
+	}
 	const astNodeType = astNode.type;
 	const nameArr: string[] = name.split(".");
 	const nameArrLen: number = nameArr.length - 1;
-	const { isInset } = option;
-	// console.log("setObjectAttr", astNode, name, value);
+	const { isInset } = option; 
 	if (astNodeType === "ArrayExpression") {
 		const curName = nameArr[0] || `${nameArr[0]}` === "0" ? Number(nameArr[0]) : undefined;
 		const { elements } = astNode as ArrayExpression;
 		const targetAst = elements[curName];
-		const valueLevel = nameArr.splice(1, nameArr.length - 1);
-		// console.log("直接替换", nameArr, curName);
+		const valueLevel = nameArr.splice(1, nameArr.length - 1); 
 		if (!curName && curName !== 0) {
 			// 直接替换属性
 			return createLiteral(value);
@@ -38,8 +43,16 @@ const setObjectAttr: SetObjectAttr = (astNode, name, value, option = {}) => {
 				elements.push(createLiteral(value));
 				return astNode;
 			} else {
-				// 修改数组中的某个元素
-				elements[curName] = setObjectAttr(elements[curName], valueLevel.join("."), value) as any;
+				// console.log('nameArrLen', nameArrLen)
+				// 首层情况下只会等于 2
+				if (isInset && nameArrLen === 0) {
+					// 新增数组项
+					// console.log('新增数组项', curName, value);
+					elements.splice(Number(curName), 0, createLiteral(value)); 
+				} else {
+					// 修改数组中的某个元素
+					elements[curName] = setObjectAttr(elements[curName], valueLevel.join("."), value, option) as any;
+				}
 			}
 		}
 	}
@@ -100,8 +113,8 @@ const setObjectAttr: SetObjectAttr = (astNode, name, value, option = {}) => {
 			// 向数组的某个位置插入一条数据
 			// 是最后一项匹配，并且匹配的项是数组
 			// 因为设置数组项一定是 array.n 所以 nameArrLen - 1 （在array层去设置，而不是具体项去设置）
-			if (index === nameArrLen - 1 && findTargetAttr && findTargetAttr?.value?.type === "ArrayExpression" && isInset) { 
-				findTargetAttr.value.elements.splice(+nameArr[nameArrLen], 0, createLiteral(value)) 
+			if (index === nameArrLen - 1 && findTargetAttr && findTargetAttr?.value?.type === "ArrayExpression" && isInset) {
+				findTargetAttr.value.elements.splice(+nameArr[nameArrLen], 0, createLiteral(value));
 				return { parent, root, stop: true };
 			}
 

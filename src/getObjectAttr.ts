@@ -1,4 +1,4 @@
-import { ObjectExpression, MemberExpression, ArrayExpression } from "@babel/types";
+import { ObjectExpression, MemberExpression, ArrayExpression, StringLiteral, NumericLiteral, BooleanLiteral, NullLiteral } from "@babel/types";
 const $ = require("gogocode");
 export type GetObjectAttrRes = boolean | string | number | any[] | { [field: string]: any } | undefined;
 
@@ -46,6 +46,10 @@ export type GetObjectAttr<T = GetObjectAttrRes> = (astNode: ObjectExpression | A
 const getObjectAttr: GetObjectAttr = (astNode, name) => {
 	const nameArr: string[] = name ? (name as string).split(".") : [];
 	const nameArrLen: number = nameArr.length - 1;
+	if (!astNode) {
+		console.warn(`getObjectAttr 函数必须传入 astNode`);
+		return;
+	}
 	const astNodeType = astNode.type;
 	// 如果是数组
 	if (astNodeType === "ArrayExpression") {
@@ -53,8 +57,8 @@ const getObjectAttr: GetObjectAttr = (astNode, name) => {
 		const { elements } = astNode as ArrayExpression;
 		if (curName || curName === 0) {
 			const targetAst = elements[curName];
+			// console.log(targetAst, elements, curName)
 			const nextAttr = nameArr.splice(1, nameArr.length - 1).join(".");
-			// console.log(targetAst, nextAttr)
 			// 这个类型除了为对象就是数组，所以直接as为对象
 			return getObjectAttr(targetAst as ObjectExpression, nextAttr);
 		} else {
@@ -85,7 +89,24 @@ const getObjectAttr: GetObjectAttr = (astNode, name) => {
 						obj[key] = getObjectAttr(item.value);
 						break;
 					case "ArrayExpression":
-						const elements: any[] = item.value.elements?.map?.((item: any) => getObjectAttr(item));
+						const elements: any[] = item.value.elements?.map?.((item: ArrayExpression | ObjectExpression | StringLiteral | NumericLiteral | BooleanLiteral | NullLiteral) => {
+							const { type } = item;
+							switch (type) {
+								case "ObjectExpression":
+									return getObjectAttr(item as ObjectExpression);
+								case "StringLiteral":
+									return (item as StringLiteral).value;
+								case "NumericLiteral":
+									return (item as NumericLiteral).value;
+								case "BooleanLiteral":
+									return (item as BooleanLiteral).value;
+								case "NullLiteral": 
+									return null;
+								default:
+									console.error(`[getObjectAttr.ts] 暂不支持读取数组属性 ${key} 的类型：`, type);
+									return "__disabled__";
+							}
+						});
 						obj[key] = elements;
 						break;
 					case "MemberExpression":
@@ -113,15 +134,15 @@ const getObjectAttr: GetObjectAttr = (astNode, name) => {
 						break;
 					default:
 						obj[key] = "__disabled__";
-						console.error(`[getObjectAttr.ts] 暂不支持读取属性 ${key} 的类型：`, type);
+						// console.error(`[getObjectAttr.ts] 暂不支持读取属性 ${key} 的类型：`, type);
 						break;
 				}
 			});
 		}
 		return obj;
 	}
-
 	let arrtVal: GetObjectAttrRes = undefined;
+	// console.log(nameArr, astNode)
 	// pre 是ast对象
 	nameArr.reduce(($pre: any, cur: string | number, index: number) => {
 		// 中杠时候记住需要加引号
@@ -197,15 +218,27 @@ const getObjectAttr: GetObjectAttr = (astNode, name) => {
 								const type: any = item.value?.type;
 								if (type === "StringLiteral") {
 									(arrtVal as any)[key] = value;
-								} else { 
-									// 非字符串，需要解析 
+								} else {
+									// 非字符串，需要解析
 									(arrtVal as any)[key] = getObjectAttr(item.node || item.value);
 								}
 							});
 						}
 					} else {
 						curASTNode.each((item: any) => {
-							arrtVal = item.match[0][0].value;
+							switch (item.match[0][0].node?.type) {
+								case "ArrowFunctionExpression":
+								case "FunctionExpression":
+								case "ObjectMethod":
+								case "Identifier":
+								case "NewExpression":
+								case "JSXElement":
+									arrtVal = "__disabled__";
+									break;
+								default:
+									arrtVal = item.match[0][0].value;
+									break;
+							}
 						});
 					}
 				}
