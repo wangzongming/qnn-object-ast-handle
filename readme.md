@@ -18,12 +18,6 @@
 
 除了上面所说外，另外希望读者能顺手点个 star ~ 非常感谢。
 
-### 本插件建立在以下插件基础之上
-
-- @babel/types https://babeljs.io/docs/en/babel-types
-- gogocode https://github.com/thx/gogocode#readme
-
-
 ### 安装
 
     yarn add qnn-object-ast-handle | yarn i qnn-object-ast-handle
